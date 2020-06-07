@@ -28,7 +28,10 @@ def get_login_info(url):
         print(e.response['Error']['Message'])
         return None
 
-    item = response['Item']
+    try:
+        item = response['Item']
+    except:
+        raise Exception("There is no login information for that url.")
     pass_types = item['pass_types']
 
     all_count = 0
