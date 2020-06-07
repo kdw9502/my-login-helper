@@ -4,7 +4,7 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 
-# from tld import get_tld, get_fld
+from tld import get_tld, get_fld
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 table = dynamodb.Table("my_login_helper")
@@ -50,17 +50,21 @@ def get_login_info(url):
 def create_login_info(infos):
     infos["count"] = 1
     url = infos.pop("url")
+
     new_info = {"url": url, "pass_types": [infos]}
 
-    return table.put_item(Item=new_info)
+    table.put_item(Item=new_info)
+
+    return new_info
 
 
-def add_login_info(url, infos):
+def add_login_info(infos):
     url = infos.pop('url')
+
     try:
         response = table.get_item(Key={'url': url})
         item = response['Item']
-    except (ClientError,KeyError) as e:
+    except (ClientError, KeyError) as e:
         # 기존 키 부재
         try:
             infos['url'] = url
@@ -72,7 +76,7 @@ def add_login_info(url, infos):
             print("Insert Item succeeded:", response)
             return response
 
-    for key,value in infos.items():
+    for key, value in infos.items():
         if type(value) is int or type(value) is float:
             infos[key] = decimal.Decimal(value)
 
@@ -90,18 +94,18 @@ def add_login_info(url, infos):
         infos["count"] = 1
         item["pass_types"].append(infos)
 
-    item.pop("url",None)
+    item.pop("url", None)
     update_expression = "set " + ", ".join([f"{key} = :{key}" for key in item.keys()])
 
     response = table.update_item(
         Key={'url': url},
         UpdateExpression=update_expression,
-        ExpressionAttributeValues={":"+key:value for key,value in item.items()},
+        ExpressionAttributeValues={":" + key: value for key, value in item.items()},
         ReturnValues="UPDATED_NEW"
     )
 
     print("Update Item succeeded:", response)
-    return response
+    return item
 
 
 def respond(err, res=None):
@@ -121,13 +125,30 @@ def lambda_handler(event, context):
 
     if operation == "GET":
         info = event['queryStringParameters']
+        info['url'] = info['url'].replace("www.", "")
+        tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
-            return respond(None, get_login_info(info['url']))
+
+            result = [get_login_info(f"{tld.subdomain}.{tld.domain}.{tld.tld}")]
+            if tld.subdomain:
+                result.append(get_login_info(f"*.{tld.domain}.{tld.tld}"))
+
+            return respond(None, result)
         except Exception as e:
             return respond(e)
     elif operation == "POST":
         info = json.loads(event['body'])
+        info['url'] = info['url'].replace("www.", "")
+        tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
-            return respond(None, add_login_info(info['url'],info))
+            result = []
+            info['url'] = f"{tld.subdomain}.{tld.domain}.{tld.tld}"
+            result.append(add_login_info(info))
+
+            if tld.subdomain:
+                info['url'] = f"*.{tld.domain}.{tld.tld}"
+                result.append(add_login_info(info))
+
+            return respond(None, result)
         except Exception as e:
             return respond(e)
