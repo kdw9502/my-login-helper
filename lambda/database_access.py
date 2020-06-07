@@ -38,7 +38,7 @@ def get_login_info(url):
     top_3_types = sorted(pass_types, key=lambda x: x['count'], reverse=True)[:3]
 
     for type in top_3_types:
-        type["percent"] = type["count"] / all_count * 100 // 0.01 * 0.01
+        type["percent"] = type["count"] / all_count * 100
 
     result = {"url": url, "pass_types": top_3_types}
     return result
@@ -56,9 +56,11 @@ def add_login_info(url, infos):
     url = infos.pop('url')
     try:
         response = table.get_item(Key={'url': url})
-    except ClientError as e:
+        item = response['Item']
+    except (ClientError,KeyError) as e:
         # 기존 키 부재
         try:
+            infos['url'] = url
             response = create_login_info(infos)
         except ClientError as e:
             print("fail to update or create :", e)
@@ -72,7 +74,6 @@ def add_login_info(url, infos):
             infos[key] = decimal.Decimal(value)
 
     # 기존 키 존재
-    item = response['Item']
     pass_types = item["pass_types"]
     is_new = True
     for i in range(len(pass_types)):
@@ -103,7 +104,7 @@ def add_login_info(url, infos):
 def respond(err, res=None):
     return {
         'statusCode': '400' if err else '200',
-        'body': str(err) if err else json.dumps(res, cls=DecimalEncoder),
+        'body': f"{type(err).__name__} {str(err)}" if err else json.dumps(res, cls=DecimalEncoder),
         'headers': {
             'Content-Type': 'application/json',
         },
