@@ -128,10 +128,10 @@ def lambda_handler(event, context):
         info['url'] = info['url'].replace("www.", "")
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
-
-            result = [get_login_info(f"{tld.subdomain}.{tld.domain}.{tld.tld}")]
+            result = dict()
+            result["main"] = get_login_info(f"{tld.subdomain}.{tld.domain}.{tld.tld}")
             if tld.subdomain:
-                result.append(get_login_info(f"*.{tld.domain}.{tld.tld}"))
+                result["sub"] = get_login_info(f"*.{tld.domain}.{tld.tld}")
 
             return respond(None, result)
         except Exception as e:
@@ -141,13 +141,13 @@ def lambda_handler(event, context):
         info['url'] = info['url'].replace("www.", "")
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
-            result = []
+            result = dict()
             info['url'] = f"{tld.subdomain}.{tld.domain}.{tld.tld}"
-            result.append(add_login_info(info))
+            result["main"] = add_login_info(info)
 
             if tld.subdomain:
                 info['url'] = f"*.{tld.domain}.{tld.tld}"
-                result.append(add_login_info(info))
+                result["sub"] = add_login_info(info)
 
             return respond(None, result)
         except Exception as e:
