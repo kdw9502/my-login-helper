@@ -4,7 +4,7 @@ import boto3
 import json
 from botocore.exceptions import ClientError
 
-from tld import get_tld, get_fld
+# from tld import get_tld, get_fld
 
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 table = dynamodb.Table("my_login_helper")
@@ -35,28 +35,24 @@ def get_login_info(url):
     for pass_type in pass_types:
         all_count = all_count + pass_type['count']
 
-    top_3_types = sorted(pass_types,key= lambda x:x['count'], reverse=True)[:3]
+    top_3_types = sorted(pass_types, key=lambda x: x['count'], reverse=True)[:3]
 
     for type in top_3_types:
-        type["percent"] = type["count"]/all_count * 100 // 0.01 * 0.01
+        type["percent"] = type["count"] / all_count * 100 // 0.01 * 0.01
 
-    result = {"url": url, "pass_types":top_3_types}
+    result = {"url": url, "pass_types": top_3_types}
     return result
 
 
 def create_login_info(infos):
     infos["count"] = 1
     url = infos.pop("url")
-    new_info = {"url": url, "pass_types":[infos]}
+    new_info = {"url": url, "pass_types": [infos]}
 
     return table.put_item(Item=new_info)
 
 
-def is_same_pass_type():
-
-
 def add_login_info(url, infos):
-    print(infos)
     url = infos.pop('url')
     try:
         response = table.get_item(Key={'url': url})
@@ -66,26 +62,37 @@ def add_login_info(url, infos):
             response = create_login_info(infos)
         except ClientError as e:
             print("fail to update or create :", e)
+            return None
         else:
             print("Insert Item succeeded:", response)
             return response
-    else:
-        # 기존 키 존재
-        item = response['Item']
-        pass_types = item["pass_types"]
-        for i in range(len(pass_types)):
-            count = pass_types[i].pop('count')
-            if pass_types[i] == infos:
-                pass_types[i]['count'] = count + 1
-                break
 
+    for key,value in infos.items():
+        if type(value) is int or type(value) is float:
+            infos[key] = decimal.Decimal(value)
 
-    update_expression = "set " + ", ".join([f"{key} = :{key}" for key in infos.keys()])
+    # 기존 키 존재
+    item = response['Item']
+    pass_types = item["pass_types"]
+    is_new = True
+    for i in range(len(pass_types)):
+        count = pass_types[i].pop('count')
+        if pass_types[i] == infos:
+            item["pass_types"][i]['count'] = count + 1
+            is_new = False
+            break
+
+    if is_new:
+        infos["count"] = 1
+        item["pass_types"].append(infos)
+
+    item.pop("url",None)
+    update_expression = "set " + ", ".join([f"{key} = :{key}" for key in item.keys()])
 
     response = table.update_item(
         Key={'url': url},
         UpdateExpression=update_expression,
-        ExpressionAttributeValues=infos,
+        ExpressionAttributeValues={":"+key:value for key,value in item.items()},
         ReturnValues="UPDATED_NEW"
     )
 
@@ -116,9 +123,7 @@ def lambda_handler(event, context):
             return respond(e)
     elif operation == "POST":
         info = json.loads(event['body'])
-        print(info)
         try:
-            return respond(add_login_info(info['url'], info))
+            return respond(None, add_login_info(info['url'],info))
         except Exception as e:
             return respond(e)
-
