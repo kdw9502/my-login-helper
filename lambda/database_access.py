@@ -34,6 +34,8 @@ def get_login_info(url):
         raise Exception("There is no login information for that url.")
     pass_types = item['pass_types']
 
+
+
     all_count = 0
     for pass_type in pass_types:
         all_count = all_count + pass_type['count']
@@ -43,7 +45,19 @@ def get_login_info(url):
     for type in top_3_types:
         type["percent"] = type["count"] / all_count * 100
 
-    result = {"url": url, "pass_types": top_3_types}
+    length_list = item["length_list"]
+
+    _sum = sum(length_list)
+    iter_sum = 0
+    min_len = 0
+    for i,value in enumerate(length_list):
+        iter_sum += value
+        if iter_sum > _sum * decimal.Decimal(0.1):
+            min_len = i
+            break
+
+    result = {"url": url, "pass_types": top_3_types, "min_len": min_len}
+
     return result
 
 
@@ -51,7 +65,12 @@ def create_login_info(infos):
     infos["count"] = 1
     url = infos.pop("url")
 
+    length = int(infos.pop("length",infos.pop("len",0)))
+
     new_info = {"url": url, "pass_types": [infos]}
+
+    new_info["length_list"] = [0 for _ in range(31)]
+    new_info["length_list"][length] = 1
 
     table.put_item(Item=new_info)
 
@@ -60,6 +79,9 @@ def create_login_info(infos):
 
 def add_login_info(infos):
     url = infos.pop('url')
+    length = int(infos.pop('len',infos.pop('length',0)))
+    if length > 30:
+        length = 30
 
     try:
         response = table.get_item(Key={'url': url})
@@ -68,6 +90,7 @@ def add_login_info(infos):
         # 기존 키 부재
         try:
             infos['url'] = url
+            infos['length'] = length
             response = create_login_info(infos)
         except ClientError as e:
             print("fail to update or create :", e)
@@ -93,6 +116,9 @@ def add_login_info(infos):
     if is_new:
         infos["count"] = 1
         item["pass_types"].append(infos)
+
+    if length != 0:
+        item["length_list"][length] += 1
 
     item.pop("url", None)
     update_expression = "set " + ", ".join([f"{key} = :{key}" for key in item.keys()])
@@ -143,8 +169,7 @@ def lambda_handler(event, context):
         try:
             result = dict()
             info['url'] = f"{tld.subdomain}.{tld.domain}.{tld.tld}"
-            result["main"] = add_login_info(info)
-
+            result["main"] = add_login_info(info.copy())
             if tld.subdomain:
                 info['url'] = f"*.{tld.domain}.{tld.tld}"
                 result["sub"] = add_login_info(info)
