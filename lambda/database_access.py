@@ -155,7 +155,7 @@ def lambda_handler(event, context):
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
             result = dict()
-            result["main"] = get_login_info(str.join('.', [tld.subdomain, tld.domain, tld.tld]))
+            result["main"] = get_login_info(str.join('.', filter(None, [tld.subdomain, tld.domain, tld.tld])))
             if tld.subdomain:
                 result["sub"] = get_login_info(str.join('.', ['*',tld.domain, tld.tld]))
 
@@ -168,7 +168,7 @@ def lambda_handler(event, context):
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
             result = dict()
-            info['url'] = str.join('.', [tld.subdomain, tld.domain, tld.tld])
+            info['url'] = str.join('.', filter(None, [tld.subdomain, tld.domain, tld.tld]))
             result["main"] = add_login_info(info.copy())
             if tld.subdomain:
                 info['url'] = str.join('.', ['*',tld.domain, tld.tld])
