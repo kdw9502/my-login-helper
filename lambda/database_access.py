@@ -155,9 +155,9 @@ def lambda_handler(event, context):
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
             result = dict()
-            result["main"] = get_login_info(f"{tld.subdomain}.{tld.domain}.{tld.tld}")
+            result["main"] = get_login_info(str.join('.', [tld.subdomain, tld.domain, tld.tld]))
             if tld.subdomain:
-                result["sub"] = get_login_info(f"*.{tld.domain}.{tld.tld}")
+                result["sub"] = get_login_info(str.join('.', ['*',tld.domain, tld.tld]))
 
             return respond(None, result)
         except Exception as e:
@@ -168,10 +168,10 @@ def lambda_handler(event, context):
         tld = get_tld(info['url'], as_object=True, fix_protocol=True)
         try:
             result = dict()
-            info['url'] = f"{tld.subdomain}.{tld.domain}.{tld.tld}"
+            info['url'] = str.join('.', [tld.subdomain, tld.domain, tld.tld])
             result["main"] = add_login_info(info.copy())
             if tld.subdomain:
-                info['url'] = f"*.{tld.domain}.{tld.tld}"
+                info['url'] = str.join('.', ['*',tld.domain, tld.tld])
                 result["sub"] = add_login_info(info)
 
             return respond(None, result)
