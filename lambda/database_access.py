@@ -140,6 +140,7 @@ def respond(err, res=None):
         'body': f"{type(err).__name__} {str(err)}" if err else json.dumps(res, cls=DecimalEncoder),
         'headers': {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
         },
     }
 
