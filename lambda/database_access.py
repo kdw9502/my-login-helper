@@ -38,9 +38,9 @@ def get_login_info(url):
 
     all_count = 0
     for pass_type in pass_types:
-        all_count = all_count + pass_type['count']
+        all_count = all_count + pass_type.get('count',0)
 
-    top_3_types = sorted(pass_types, key=lambda x: x['count'], reverse=True)[:3]
+    top_3_types = sorted(pass_types, key=lambda x: x.get('count',0), reverse=True)[:3]
 
     for type in top_3_types:
         type["percent"] = type["count"] / all_count * 100
@@ -107,7 +107,7 @@ def add_login_info(infos):
     pass_types = item["pass_types"]
     is_new = True
     for i in range(len(pass_types)):
-        count = pass_types[i].pop('count')
+        count = pass_types[i].pop('count',0)
         if pass_types[i] == infos:
             item["pass_types"][i]['count'] = count + 1
             is_new = False
