@@ -34,23 +34,26 @@ def get_login_info(url):
         raise Exception("There is no login information for that url.")
     pass_types = item['pass_types']
 
-
-
     all_count = 0
-    for pass_type in pass_types:
-        all_count = all_count + pass_type.get('count',0)
+    for i, pass_type in enumerate(pass_types):
+        _count = pass_type.get('count', 0)
+        if _count == 0:
+            pass_types[i]['count'] = 1
+            _count = 1
 
-    top_3_types = sorted(pass_types, key=lambda x: x.get('count',0), reverse=True)[:3]
+        all_count = all_count + _count
+
+    top_3_types = sorted(pass_types, key=lambda x: x.get('count', 0), reverse=True)[:3]
 
     for type in top_3_types:
-        type["percent"] = type["count"] / all_count * 100
+        type["percent"] = type.get("count", 0) / all_count * 100
 
     length_list = item["length_list"]
 
     _sum = sum(length_list)
     iter_sum = 0
     min_len = 0
-    for i,value in enumerate(length_list):
+    for i, value in enumerate(length_list):
         iter_sum += value
         if iter_sum > _sum * decimal.Decimal(0.1):
             min_len = i
@@ -65,7 +68,7 @@ def create_login_info(infos):
     infos["count"] = 1
     url = infos.pop("url")
 
-    length = int(infos.pop("length",infos.pop("len",0)))
+    length = int(infos.pop("length", infos.pop("len", 0)))
 
     new_info = {"url": url, "pass_types": [infos]}
 
@@ -79,7 +82,7 @@ def create_login_info(infos):
 
 def add_login_info(infos):
     url = infos.pop('url')
-    length = int(infos.pop('len',infos.pop('length',0)))
+    length = int(infos.pop('len', infos.pop('length', 0)))
     if length > 30:
         length = 30
 
@@ -107,7 +110,9 @@ def add_login_info(infos):
     pass_types = item["pass_types"]
     is_new = True
     for i in range(len(pass_types)):
-        count = pass_types[i].pop('count',0)
+        count = pass_types[i].pop('count', 0)
+        if count == 0:
+            item["pass_types"][i]['count'] = 1
         if pass_types[i] == infos:
             item["pass_types"][i]['count'] = count + 1
             is_new = False
@@ -158,7 +163,7 @@ def lambda_handler(event, context):
             result = dict()
             result["main"] = get_login_info(str.join('.', filter(None, [tld.subdomain, tld.domain, tld.tld])))
             if tld.subdomain:
-                result["sub"] = get_login_info(str.join('.', ['*',tld.domain, tld.tld]))
+                result["sub"] = get_login_info(str.join('.', ['*', tld.domain, tld.tld]))
 
             return respond(None, result)
         except Exception as e:
@@ -172,7 +177,7 @@ def lambda_handler(event, context):
             info['url'] = str.join('.', filter(None, [tld.subdomain, tld.domain, tld.tld]))
             result["main"] = add_login_info(info.copy())
             if tld.subdomain:
-                info['url'] = str.join('.', ['*',tld.domain, tld.tld])
+                info['url'] = str.join('.', ['*', tld.domain, tld.tld])
                 result["sub"] = add_login_info(info)
 
             return respond(None, result)
