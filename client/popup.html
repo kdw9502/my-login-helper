@@ -1,0 +1,31 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <!--<script src="set_header_text.js"></script> javascript to get current page's base url and set header text-->
+  <!--<script src="get_memo.js"></script> javascript to show pernsonal memo according to current url-->
+  <script src="handle_buttons.js"></script> <!--javascript to handle button click-->
+  <!--<link rel="stylesheet" href="reset.css">-->
+  <link rel="stylesheet" href="style.css"></link>
+</head>
+<body style="width: 300px; height: 200px;">
+  <gnb class="gnb">
+    <div class="main_logo">
+      <h2 id="main_logo">will be replaced by url in set_header_text.js</h2>
+      <script src="set_header_text.js"></script> <!--javascript to get current page's base url and set header text-->
+    </div>
+    <div class="memo-contents">
+      <h3 id="main_memo_contents">will be replaced by memo in get_memo.js</h3>
+      <script src="get_memo.js"></script> <!--javascript to show pernsonal memo according to current url-->
+    </div>
+    <div class="user-buttons">
+      <button id="add">수동 입력</button>
+      <br/><br/>
+      <button id="edit">메모 수정</button>
+    </div>
+    <div class="footer">
+      <h5 id="main_footer">My Login Helper</h5>
+    </div>
+  </gnb>
+</body>
+</html>

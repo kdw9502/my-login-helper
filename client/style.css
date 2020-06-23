@@ -1,0 +1,96 @@
+@import url(https://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+@import url(//fonts.googleapis.com/earlyaccess/jejugothic.css);
+
+body{
+  background-color: #f6f6e9;
+  border: 0;
+  outline: 0;
+}
+#add{
+  width: 270px;
+  height: 30px;
+  background-color: #a1bad0;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 20px;
+  border: 0;
+  outline: 0;
+  margin-left: 17px;
+  margin-top: 30px;
+  box-shadow : 2px 2px 5px #999;
+}
+#edit{
+  width: 270px;
+  height: 30px;
+  background-color: #a1bad0;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 20px;
+  border: 0;
+  outline: 0;
+  margin-left: 17px;
+  margin-top: 3px;
+  box-shadow : 2px 2px 5px #999;
+}
+#info_add_complete{
+  width: 270px;
+  height: 30px;
+  background-color: #a1bad0;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 20px;
+  border: 0;
+  outline: 0;
+  margin-left: 17px;
+  margin-top: 3px;
+  box-shadow : 2px 2px 5px #999;
+}
+#memo_edit_complete{
+  width: 270px;
+  height: 30px;
+  background-color: #a1bad0;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 20px;
+  border: 0;
+  outline: 0;
+  margin-left: 17px;
+  margin-top: 3px;
+  box-shadow : 2px 2px 5px #999;
+}
+h2{
+  color: #13334c;
+  font-family: 'Jeju Gothic', sans-serif;
+  font-weight: bold;
+}
+#main_footer{
+  color: #13334c;
+  font-family: 'Jeju Gothic', sans-serif;
+  text-align: end;
+  font-weight: bold;
+  position: absolute;
+  top: 180px;
+  left: 230px;
+}
+#manual_footer{
+  color: #13334c;
+  font-family: 'Jeju Gothic', sans-serif;
+  text-align: end;
+  font-weight: bold;
+  position: absolute;
+  top: 221px;
+  left: 227px;
+}
+#memo_footer{
+  color: #13334c;
+  font-family: 'Jeju Gothic', sans-serif;
+  text-align: end;
+  font-weight: bold;
+  position: absolute;
+  top: 247px;
+  left: 230px;
+}
+label{
+  font-family: 'Jeju Gothic', sans-serif;
+  font-weight: bold;
+}
