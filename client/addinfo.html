@@ -1,0 +1,31 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="add_info.js"></script>
+  <link rel="stylesheet" href="style.css"></link>
+</head>
+<body style="width: 300px; height: 200px;">
+  <gnb class="gnb">
+    <div class="title">
+      <h2 id="title">수동으로 정보 등록하기</h2>
+    </div>
+    <div class="manual-add-info">
+      <input type="checkbox" id="upper_case"><label for="checkbox">대문자</label></input>
+      <br></br>
+      <input type="checkbox" id="lower_case"><label for="checkbox">소문자</label></input>
+      <br></br>
+      <input type="checkbox" id="special"><label for="checkbox">특수문자</label></input>
+      <br></br>
+      <b>최소</b> <input type="number" id="min_len" size="5"> <b>자</b>
+      <br></br>
+      <button id="info_add_complete">추가 완료</button>
+    </div>
+    <div class="footer">
+      <h5 id="manual_footer">My Login Helper</h5>
+    </div>
+  </gnb>
+  <div class="bookmark-contents">
+  </div>
+</body>
+</html>
